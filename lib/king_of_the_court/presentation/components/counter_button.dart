@@ -3,23 +3,24 @@ import 'package:flutter/material.dart';
 class CounterButton extends StatefulWidget {
   final Color color;
   final String label;
+  final int count;
+  final Function(CounterButton) onCounterChanged;
 
-  const CounterButton({
-    super.key,
-    required this.color,
-    required this.label,
-  });
+  const CounterButton(
+      {super.key,
+      required this.color,
+      required this.label,
+      required this.count,
+      required this.onCounterChanged});
 
   @override
   State<CounterButton> createState() => _CounterButtonState();
 }
 
 class _CounterButtonState extends State<CounterButton> {
-  int _counter = 0;
-
   void _increment() {
     setState(() {
-      _counter++;
+      widget.onCounterChanged(widget);
     });
   }
 
@@ -43,7 +44,7 @@ class _CounterButtonState extends State<CounterButton> {
               ),
             ),
             Text(
-              '$_counter',
+              widget.count.toString(),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 80,

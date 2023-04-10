@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:sportify/king_of_the_court/application/counter_manager.dart';
+import 'package:sportify/king_of_the_court/application/counter_manager_impl.dart';
+import 'package:sportify/king_of_the_court/domain/counter_button_action.dart';
+import 'package:sportify/king_of_the_court/domain/counter_button_info.dart';
 import 'package:sportify/king_of_the_court/presentation/components/counter_button.dart';
 
 class KingOfTheCourtScreen extends StatefulWidget {
@@ -9,38 +13,26 @@ class KingOfTheCourtScreen extends StatefulWidget {
 }
 
 class _KingOfTheCourtScreenState extends State<KingOfTheCourtScreen> {
-  final List<CounterButtonInfo> _buttonInfoList = [
-    const CounterButtonInfo('Double One', Colors.blue, 0),
-    const CounterButtonInfo('Double Two', Colors.green, 0),
-    const CounterButtonInfo('Double Three', Colors.red, 0),
-    const CounterButtonInfo('Double Four', Colors.purple, 0),
-  ];
-
-  List<CounterAction> _counterActions = [];
+  final CounterManager _counterManager = CounterManagerImpl();
   List<CounterButtonInfo> _counters = [];
+  List<CounterAction> _counterActions = [];
 
-  void _handleCounterChanged(CounterButton counterButton) {
+  void _handleCounterChanged(CounterButtonInfo counter) {
     setState(() {
-      _counters = _counters.map((counter) {
-        if (counter.label == counterButton.label) {
-          return CounterButtonInfo(
-              counter.label, counter.color, counter.count + 1);
-        }
-        return counter;
-      }).toList();
+      _counters = _counterManager.updateCounter(_counters, counter);
     });
   }
 
   void _onResetCounters() {
     setState(() {
-      _counters = _buttonInfoList;
+      _counters = _counterManager.resetCounters();
     });
   }
 
   @override
   void initState() {
     super.initState();
-    _counters = _buttonInfoList;
+    _counters = _counterManager.getInitialCounters();
     _counterActions = [
       const CounterAction('Undo', null),
       CounterAction('Reset', _onResetCounters),
@@ -57,9 +49,7 @@ class _KingOfTheCourtScreenState extends State<KingOfTheCourtScreen> {
         crossAxisCount: 2,
         children: _counters.map((buttonInfo) {
           return CounterButton(
-            color: buttonInfo.color,
-            label: buttonInfo.label,
-            count: buttonInfo.count,
+            counter: buttonInfo,
             onCounterChanged: _handleCounterChanged,
           );
         }).toList(),
@@ -80,19 +70,4 @@ class _KingOfTheCourtScreenState extends State<KingOfTheCourtScreen> {
       ),
     );
   }
-}
-
-class CounterButtonInfo {
-  final String label;
-  final Color color;
-  final int count;
-
-  const CounterButtonInfo(this.label, this.color, this.count);
-}
-
-class CounterAction {
-  final String label;
-  final VoidCallback? onPressed;
-
-  const CounterAction(this.label, this.onPressed);
 }

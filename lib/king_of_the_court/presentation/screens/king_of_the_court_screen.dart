@@ -19,13 +19,19 @@ class _KingOfTheCourtScreenState extends State<KingOfTheCourtScreen> {
 
   void _handleCounterChanged(CounterButtonInfo counter) {
     setState(() {
-      _counters = _counterManager.updateCounter(_counters, counter);
+      _counters = _counterManager.increment(_counters, counter);
     });
   }
 
   void _onResetCounters() {
     setState(() {
-      _counters = _counterManager.resetCounters();
+      _counters = _counterManager.reset();
+    });
+  }
+
+  void _undoLastAction() {
+    setState(() {
+      _counters = _counterManager.undo(_counters);
     });
   }
 
@@ -34,7 +40,7 @@ class _KingOfTheCourtScreenState extends State<KingOfTheCourtScreen> {
     super.initState();
     _counters = _counterManager.getInitialCounters();
     _counterActions = [
-      const CounterAction('Undo', null),
+      CounterAction('Undo', _undoLastAction),
       CounterAction('Reset', _onResetCounters),
     ];
   }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:sportify/king_of_the_court/application/counter_action_manager.dart';
+import 'package:sportify/king_of_the_court/application/counter_action_manager_impl.dart';
 import 'package:sportify/king_of_the_court/application/counter_manager.dart';
 import 'package:sportify/king_of_the_court/application/counter_manager_impl.dart';
 import 'package:sportify/king_of_the_court/domain/counter_button_action.dart';
@@ -14,24 +16,36 @@ class KingOfTheCourtScreen extends StatefulWidget {
 
 class _KingOfTheCourtScreenState extends State<KingOfTheCourtScreen> {
   final CounterManager _counterManager = CounterManagerImpl();
+  final CounterActionManager _counterActionsManager =
+      CounterActionManagerImpl();
   List<CounterButtonInfo> _counters = [];
   List<CounterAction> _counterActions = [];
 
   void _handleCounterChanged(CounterButtonInfo counter) {
     setState(() {
       _counters = _counterManager.increment(_counters, counter);
+      _counterActions = _counterActionsManager.increment(
+        _onResetCounters,
+        _undoLastAction,
+      );
     });
   }
 
   void _onResetCounters() {
     setState(() {
       _counters = _counterManager.reset();
+      _counterActions = _counterActionsManager.reset();
     });
   }
 
   void _undoLastAction() {
     setState(() {
       _counters = _counterManager.undo(_counters);
+      _counterActions = _counterActionsManager.undo(
+        _counters,
+        _onResetCounters,
+        _undoLastAction,
+      );
     });
   }
 
@@ -39,10 +53,7 @@ class _KingOfTheCourtScreenState extends State<KingOfTheCourtScreen> {
   void initState() {
     super.initState();
     _counters = _counterManager.getInitialCounters();
-    _counterActions = [
-      CounterAction('Undo', _undoLastAction),
-      CounterAction('Reset', _onResetCounters),
-    ];
+    _counterActions = _counterActionsManager.getInitialCounterActions();
   }
 
   @override
